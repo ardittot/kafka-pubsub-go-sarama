@@ -78,13 +78,13 @@ func receiveMsg(topic string) {
 	if err!=nil {
 		fmt.Printf("Kafka Partitions not detected")
 	}
-	for _, part := range partitions {
-		consumer, err := kafka.ConsumePartition(topic, part, sarama.OffsetOldest)
-		if err != nil {
-			fmt.Printf("Kafka error: %s\n", err)
-			os.Exit(-1)
-		}
-		for {
+	for {
+		for _, part := range partitions {
+			consumer, err := kafka.ConsumePartition(topic, part, sarama.OffsetOldest)
+			if err != nil {
+				fmt.Printf("Kafka error: %s\n", err)
+				os.Exit(-1)
+			}
 			select {
 			case err := <-consumer.Errors():
 				fmt.Printf("Kafka error: %s\n", err)
@@ -95,6 +95,5 @@ func receiveMsg(topic string) {
 			}
 		}
 	}
-
 }
 
