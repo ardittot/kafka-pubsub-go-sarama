@@ -82,7 +82,7 @@ func receiveMsg(topic string) {
 	for {
 		//for _, part := range partitions {
 		//part := partitions[rand.Intn(len(partitions))]
-		part := 0
+		part := int32(0)
 		consumer, err := kafka.ConsumePartition(topic, part, sarama.OffsetOldest)
 		if err != nil {
 			fmt.Printf("Kafka error: %s\n", err)
