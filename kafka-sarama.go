@@ -75,28 +75,45 @@ func receiveMsg(topic string) {
 	var msgVal []byte
 	var data interface{}
 	//topics := []string{topic}
-	//partitions,err := kafka.Partitions(topic)
-	//if err!=nil {
-	//	fmt.Printf("Kafka Partitions not detected")
-	//}
-	for {
-		//for _, part := range partitions {
-		//part := partitions[rand.Intn(len(partitions))]
-		part := int32(0)
+	partitions,err := kafka.Partitions(topic)
+	if err!=nil {
+		fmt.Printf("Kafka Partitions not detected")
+	}
+	for _, part := range partitions {
 		consumer, err := kafka.ConsumePartition(topic, part, sarama.OffsetOldest)
 		if err != nil {
 			fmt.Printf("Kafka error: %s\n", err)
 			//os.Exit(-1)
 		}
-		select {
-		case err := <-consumer.Errors():
-			fmt.Printf("Kafka error: %s\n", err)
-		case msg := <-consumer.Messages():
-			msgVal = msg.Value
-			json.Unmarshal(msgVal, &data)
-			fmt.Printf("Message:\n%+v\n", data)
+		for {
+			select {
+			case err := <-consumer.Errors():
+				fmt.Printf("Kafka error: %s\n", err)
+			case msg := <-consumer.Messages():
+				msgVal = msg.Value
+				json.Unmarshal(msgVal, &data)
+				fmt.Printf("Message:\n%+v\n", data)
+			}
 		}
-		//}
 	}
+// 	for {
+// 		for _, part := range partitions {
+// 			//part := partitions[rand.Intn(len(partitions))]
+// 			//part := int32(0)
+// 			consumer, err := kafka.ConsumePartition(topic, part, sarama.OffsetOldest)
+// 			if err != nil {
+// 				fmt.Printf("Kafka error: %s\n", err)
+// 				//os.Exit(-1)
+// 			}
+// 			select {
+// 			case err := <-consumer.Errors():
+// 				fmt.Printf("Kafka error: %s\n", err)
+// 			case msg := <-consumer.Messages():
+// 				msgVal = msg.Value
+// 				json.Unmarshal(msgVal, &data)
+// 				fmt.Printf("Message:\n%+v\n", data)
+// 			}
+// 		}
+// 	}
 }
 
