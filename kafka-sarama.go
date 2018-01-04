@@ -83,7 +83,7 @@ func receiveMsg(topic string) {
 			consumer, err := kafka.ConsumePartition(topic, part, sarama.OffsetOldest)
 			if err != nil {
 				fmt.Printf("Kafka error: %s\n", err)
-				os.Exit(-1)
+				//os.Exit(-1)
 			}
 			select {
 			case err := <-consumer.Errors():
