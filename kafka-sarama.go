@@ -5,6 +5,7 @@ import (
     "fmt"
     "github.com/Shopify/sarama"
     "os"
+    "os/signal"
     //"math/rand"
     "sync"
 )
@@ -164,11 +165,12 @@ func receiveMsg(topic string) {
 // 	}
 	
 	wg.Wait()
-	logger.Println("Done consuming topic", topic)
+	//logger.Println("Done consuming topic", topic)
 	close(messages)
 
 	if err := kafka.Close(); err != nil {
-		logger.Println("Failed to close consumer: ", err)
+		//logger.Println("Failed to close consumer: ", err)
+		fmt.Printf("Failed to close consumer")
 	}
 }
 
