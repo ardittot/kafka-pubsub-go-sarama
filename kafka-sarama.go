@@ -84,7 +84,7 @@ func receiveMsg(topic string) {
 	}
 	
 	var (
-		messages = make(chan *sarama.ConsumerMessage, *bufferSize)
+		messages = make(chan *sarama.ConsumerMessage, 256)
 		closing  = make(chan struct{})
 		wg       sync.WaitGroup
 	)
@@ -93,13 +93,14 @@ func receiveMsg(topic string) {
 		signals := make(chan os.Signal, 1)
 		signal.Notify(signals, os.Kill, os.Interrupt)
 		<-signals
-		logger.Println("Initiating shutdown of consumer...")
+		//logger.Println("Initiating shutdown of consumer...")
+		fmt.Printf("Initiating shutdown of consumer")
 		close(closing)
 	}()
 	
 	for _, partition := range partitionList {
 		
-		fmt.Printf("%d\n",part)
+		fmt.Printf("%d\n",partition)
 		consumer, err := kafka.ConsumePartition(topic, partition, sarama.OffsetOldest)
 		if err != nil {
 			fmt.Printf("Kafka error: %s\n", err)
