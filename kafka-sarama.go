@@ -75,10 +75,10 @@ func receiveMsg(topic string) {
 	var msgVal []byte
 	var data interface{}
 	//topics := []string{topic}
-	partitions,err := kafka.Partitions(topic)
-	if err!=nil {
-		fmt.Printf("Kafka Partitions not detected")
-	}
+	//partitions,err := kafka.Partitions(topic)
+	//if err!=nil {
+	//	fmt.Printf("Kafka Partitions not detected")
+	//}
 	for {
 		//for _, part := range partitions {
 		//part := partitions[rand.Intn(len(partitions))]
