@@ -79,32 +79,13 @@ func receiveMsg(topic string) {
 	if err!=nil {
 		fmt.Printf("Kafka Partitions not detected")
 	}
-	for _, part := range partitions {
-		consumer, err := kafka.ConsumePartition(topic, part, sarama.OffsetOldest)
-		if err != nil {
-			fmt.Printf("Kafka error: %s\n", err)
-			//os.Exit(-1)
-		}
-		for {
-			select {
-			case err := <-consumer.Errors():
-				fmt.Printf("Kafka error: %s\n", err)
-			case msg := <-consumer.Messages():
-				msgVal = msg.Value
-				json.Unmarshal(msgVal, &data)
-				fmt.Printf("Message:\n%+v\n", data)
-			}
-		}
-	}
-// 	for {
-// 		for _, part := range partitions {
-// 			//part := partitions[rand.Intn(len(partitions))]
-// 			//part := int32(0)
-// 			consumer, err := kafka.ConsumePartition(topic, part, sarama.OffsetOldest)
-// 			if err != nil {
-// 				fmt.Printf("Kafka error: %s\n", err)
-// 				//os.Exit(-1)
-// 			}
+// 	for _, part := range partitions {
+// 		consumer, err := kafka.ConsumePartition(topic, part, sarama.OffsetOldest)
+// 		if err != nil {
+// 			fmt.Printf("Kafka error: %s\n", err)
+// 			//os.Exit(-1)
+// 		}
+// 		for {
 // 			select {
 // 			case err := <-consumer.Errors():
 // 				fmt.Printf("Kafka error: %s\n", err)
@@ -115,5 +96,21 @@ func receiveMsg(topic string) {
 // 			}
 // 		}
 // 	}
+	part := partitions[rand.Intn(len(partitions))]
+	for {
+		consumer, err := kafka.ConsumePartition(topic, part, sarama.OffsetOldest)
+		if err != nil {
+			fmt.Printf("Kafka error: %s\n", err)
+			//os.Exit(-1)
+		}
+		select {
+		case err := <-consumer.Errors():
+			fmt.Printf("Kafka error: %s\n", err)
+		case msg := <-consumer.Messages():
+			msgVal = msg.Value
+			json.Unmarshal(msgVal, &data)
+			fmt.Printf("Message:\n%+v\n", data)
+		}
+	}
 }
 
