@@ -5,7 +5,7 @@ import (
     "fmt"
     "github.com/Shopify/sarama"
     "os"
-    "math/rand"
+    //"math/rand"
 )
 
 var (
