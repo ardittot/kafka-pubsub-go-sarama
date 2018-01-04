@@ -6,6 +6,7 @@ import (
     "github.com/Shopify/sarama"
     "os"
     //"math/rand"
+    "sync"
 )
 
 var (
@@ -75,17 +76,49 @@ func receiveMsg(topic string) {
 	var msgVal []byte
 	var data interface{}
 	//topics := []string{topic}
-	partitions,err := kafka.Partitions(topic)
+	
+	partitionList,err := kafka.Partitions(topic)
 	if err!=nil {
 		fmt.Printf("Kafka Partitions not detected")
 	}
-	for _, part := range partitions {
+	
+	var (
+		messages = make(chan *sarama.ConsumerMessage, *bufferSize)
+		closing  = make(chan struct{})
+		wg       sync.WaitGroup
+	)
+	
+	go func() {
+		signals := make(chan os.Signal, 1)
+		signal.Notify(signals, os.Kill, os.Interrupt)
+		<-signals
+		logger.Println("Initiating shutdown of consumer...")
+		close(closing)
+	}()
+	
+	for _, partition := range partitionList {
+		
 		fmt.Printf("%d\n",part)
-		consumer, err := kafka.ConsumePartition(topic, part, sarama.OffsetOldest)
+		consumer, err := kafka.ConsumePartition(topic, partition, sarama.OffsetOldest)
 		if err != nil {
 			fmt.Printf("Kafka error: %s\n", err)
-			//os.Exit(-1)
+			os.Exit(-1)
 		}
+		
+		go func(consumer sarama.PartitionConsumer) {
+			<-closing
+			consumer.AsyncClose()
+		}(consumer)
+
+		wg.Add(1)
+		go func(consumer sarama.PartitionConsumer) {
+			defer wg.Done()
+			for message := range consumer.Messages() {
+				messages <- message
+			}
+		}(consumer)
+		
+		/*
 		for {
 			select {
 			case err := <-consumer.Errors():
@@ -96,7 +129,22 @@ func receiveMsg(topic string) {
 				fmt.Printf("Message:\n%+v\n", data)
 			}
 		}
+		*/
 	}
+	
+	go func() {
+		for msg := range messages {
+// 			fmt.Printf("Partition:\t%d\n", msg.Partition)
+// 			fmt.Printf("Offset:\t%d\n", msg.Offset)
+// 			fmt.Printf("Key:\t%s\n", string(msg.Key))
+// 			fmt.Printf("Value:\t%s\n", string(msg.Value))
+// 			fmt.Println()
+			msgVal = msg.Value
+			json.Unmarshal(msgVal, &data)
+			fmt.Printf("Message:\n%+v\n", data)
+		}
+	}()
+	
 // 	part := partitions[rand.Intn(len(partitions))]
 // 	fmt.Printf("%d\n",part)
 // 	for {
@@ -114,5 +162,13 @@ func receiveMsg(topic string) {
 // 			fmt.Printf("Message:\n%+v\n", data)
 // 		}
 // 	}
+	
+	wg.Wait()
+	logger.Println("Done consuming topic", topic)
+	close(messages)
+
+	if err := kafka.Close(); err != nil {
+		logger.Println("Failed to close consumer: ", err)
+	}
 }
 
