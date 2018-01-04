@@ -6,14 +6,11 @@ import (
     "github.com/Shopify/sarama"
     "os"
     "os/signal"
-    //"math/rand"
     "sync"
 )
 
 var (
     brokers = []string{"10.148.0.4:9092"}
-    //topic   = "test2"
-    //topics  = []string{topic}
 )
 
 var producer sarama.SyncProducer
@@ -94,7 +91,7 @@ func receiveMsg(topic string) {
 		signal.Notify(signals, os.Kill, os.Interrupt)
 		<-signals
 		//logger.Println("Initiating shutdown of consumer...")
-		fmt.Printf("Initiating shutdown of consumer")
+		fmt.Println("Initiating shutdown of consumer...")
 		close(closing)
 	}()
 	
@@ -119,19 +116,6 @@ func receiveMsg(topic string) {
 				messages <- message
 			}
 		}(consumer)
-		
-		/*
-		for {
-			select {
-			case err := <-consumer.Errors():
-				fmt.Printf("Kafka error: %s\n", err)
-			case msg := <-consumer.Messages():
-				msgVal = msg.Value
-				json.Unmarshal(msgVal, &data)
-				fmt.Printf("Message:\n%+v\n", data)
-			}
-		}
-		*/
 	}
 	
 	go func() {
@@ -147,31 +131,14 @@ func receiveMsg(topic string) {
 		}
 	}()
 	
-// 	part := partitions[rand.Intn(len(partitions))]
-// 	fmt.Printf("%d\n",part)
-// 	for {
-// 		consumer, err := kafka.ConsumePartition(topic, part, sarama.OffsetOldest)
-// 		if err != nil {
-// 			fmt.Printf("Kafka error: %s\n", err)
-// 			//os.Exit(-1)
-// 		}
-// 		select {
-// 		case err := <-consumer.Errors():
-// 			fmt.Printf("Kafka error: %s\n", err)
-// 		case msg := <-consumer.Messages():
-// 			msgVal = msg.Value
-// 			json.Unmarshal(msgVal, &data)
-// 			fmt.Printf("Message:\n%+v\n", data)
-// 		}
-// 	}
-	
 	wg.Wait()
 	//logger.Println("Done consuming topic", topic)
+	fmt.Println("Done consuming topic", topic)
 	close(messages)
 
 	if err := kafka.Close(); err != nil {
 		//logger.Println("Failed to close consumer: ", err)
-		fmt.Printf("Failed to close consumer")
+		fmt.Println("Failed to close consumer: ", err)
 	}
 }
 
