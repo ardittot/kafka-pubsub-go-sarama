@@ -97,6 +97,7 @@ func receiveMsg(topic string) {
 // 		}
 // 	}
 	part := partitions[rand.Intn(len(partitions))]
+	fmt.Printf("%d",part)
 	for {
 		consumer, err := kafka.ConsumePartition(topic, part, sarama.OffsetOldest)
 		if err != nil {
