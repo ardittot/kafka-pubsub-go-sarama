@@ -8,7 +8,7 @@ import (
 )
 
 func AddConsumerTopic(c *gin.Context) {
-    topic := c.Param("topic")
+    topic,err := c.Param("topic")
     if err==nil {
 	go receiveMsg(topic) // Add new Kafka topic 
         c.JSON(http.StatusOK, gin.H{"status": http.StatusOK})
