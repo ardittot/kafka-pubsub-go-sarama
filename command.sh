@@ -4,7 +4,7 @@ go run main.go
 go build
 ./kafka-pubsub
 
-# Update list of topics for async subscriber
-#curl -X GET http://localhost:8010/update
+# Add new topic for kafka consumer to be running forever as a goroutine
+curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d '{"topic":"test2","group":"test2-group1"}' http://localhost:8010/subscribe/add
 # Publish data to Kafka
 curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d @./json/example.json http://localhost:8010/publish/<topic-name>

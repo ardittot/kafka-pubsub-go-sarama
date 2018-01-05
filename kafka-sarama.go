@@ -6,16 +6,31 @@ import (
     "github.com/Shopify/sarama"
     "os"
     "os/signal"
-    "sync"
+    //"sync"
 )
 
 var (
     brokers = []string{"10.148.0.4:9092"}
 )
 
+type topicType[]string
+type ConsumerParam struct {
+    Topic string `json:topic`
+    Group string `json:group`
+}
+
 var producer sarama.SyncProducer
 var kafka sarama.Consumer
-var topicList []string
+var topicList topicType
+
+func (l *topicType) removeElement(item string) {
+    l1 := *l
+    for i, other := range *l {
+        if other == item {
+            l1 = append(l1[:i], l1[i+1:]...)
+        }
+    }
+}
 
 func newKafkaConfiguration() *sarama.Config {
     conf := sarama.NewConfig()
@@ -71,23 +86,25 @@ func sendMsg(topic string, event interface{}) error {
 	return nil
 }
 
-func receiveMsg(topic string) {
+func receiveMsg(param ConsumerParam) error {
+	topic := param.Topic
 	var msgVal []byte
 	var data interface{}
-	
+
 	partitionList,err := kafka.Partitions(topic)
 	if err!=nil {
 		fmt.Printf("Kafka Partitions not detected")
+		return err
 	}
 	topicList = append(topicList, topic)
 	fmt.Printf("Add New Topic %v",topicList)
-	
+
 	var (
 		messages = make(chan *sarama.ConsumerMessage, 256)
 		closing  = make(chan struct{})
-		wg       sync.WaitGroup
+		//wg       sync.WaitGroup
 	)
-	
+
 	go func() {
 		signals := make(chan os.Signal, 1)
 		signal.Notify(signals, os.Kill, os.Interrupt)
@@ -96,30 +113,32 @@ func receiveMsg(topic string) {
 		fmt.Println("Initiating shutdown of consumer...")
 		close(closing)
 	}()
-	
+
 	for _, partition := range partitionList {
-		
+
 		fmt.Printf("%d\n",partition)
 		consumer, err := kafka.ConsumePartition(topic, partition, sarama.OffsetOldest)
 		if err != nil {
-			fmt.Printf("Kafka error: %s\n", err)
-			os.Exit(-1)
+			topicList.removeElement(topic)
+			fmt.Printf("Kafka error: %s\nLeft topics: %s\n", err,topicList)
+			return err
+			//os.Exit(-1)
 		}
-		
+
 		go func(consumer sarama.PartitionConsumer) {
 			<-closing
 			consumer.AsyncClose()
 		}(consumer)
 
-		wg.Add(1)
+		//wg.Add(1)
 		go func(consumer sarama.PartitionConsumer) {
-			defer wg.Done()
+			//defer wg.Done()
 			for message := range consumer.Messages() {
 				messages <- message
 			}
 		}(consumer)
 	}
-	
+
 	go func() {
 		for msg := range messages {
 // 			fmt.Printf("Partition:\t%d\n", msg.Partition)
@@ -132,9 +151,9 @@ func receiveMsg(topic string) {
 			fmt.Printf("Message:\n%+v\n", data)
 		}
 	}()
-	
+	/*
 	wg.Wait()
-	//logger.Println("Done consuming topic", topic)
+	logger.Println("Done consuming topic", topic)
 	fmt.Println("Done consuming topic", topic)
 	close(messages)
 
@@ -142,5 +161,7 @@ func receiveMsg(topic string) {
 		//logger.Println("Failed to close consumer: ", err)
 		fmt.Println("Failed to close consumer: ", err)
 	}
+	*/
+	return err
 }
 

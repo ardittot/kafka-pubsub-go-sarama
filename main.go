@@ -17,7 +17,7 @@ func main() {
   kafka = newKafkaConsumer()
 
   // Run kafka consumer asynchronously
-  go receiveMsg("test2")
+  //go receiveMsg("test2")
 
   // Initialize the routes
   initializeRoutes()
