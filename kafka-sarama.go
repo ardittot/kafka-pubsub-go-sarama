@@ -34,7 +34,7 @@ func (l *topicType) removeElement(item string) {
 
 func useConsumer(msg *sarama.ConsumerMessage) {
 	var data interface{}
-	msgVal = msg.Value
+	msgVal := msg.Value
 	json.Unmarshal(msgVal, &data)
 	fmt.Printf("Message:\n%+v\n", data)
 }
@@ -95,8 +95,6 @@ func sendMsg(topic string, event interface{}) error {
 
 func receiveMsg(param ConsumerParam) error {
 	topic := param.Topic
-	var msgVal []byte
-	var data interface{}
 
 	partitionList,err := kafka.Partitions(topic)
 	if err!=nil {
@@ -148,14 +146,13 @@ func receiveMsg(param ConsumerParam) error {
 
 	go func() {
 		for msg := range messages {
-// 			fmt.Printf("Partition:\t%d\n", msg.Partition)
-// 			fmt.Printf("Offset:\t%d\n", msg.Offset)
-// 			fmt.Printf("Key:\t%s\n", string(msg.Key))
-// 			fmt.Printf("Value:\t%s\n", string(msg.Value))
-// 			fmt.Println()
-// 			msgVal = msg.Value
-// 			json.Unmarshal(msgVal, &data)
-// 			fmt.Printf("Message:\n%+v\n", data)
+			/*
+ 			fmt.Printf("Partition:\t%d\n", msg.Partition)
+ 			fmt.Printf("Offset:\t%d\n", msg.Offset)
+ 			fmt.Printf("Key:\t%s\n", string(msg.Key))
+ 			fmt.Printf("Value:\t%s\n", string(msg.Value))
+ 			fmt.Println()
+			*/
 			useConsumer(msg)
 		}
 	}()
