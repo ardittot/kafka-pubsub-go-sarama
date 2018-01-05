@@ -30,6 +30,14 @@ func (l *topicType) removeElement(item string) {
             l1 = append(l1[:i], l1[i+1:]...)
         }
     }
+    *l = l1
+}
+
+func(l *topicType) addElement(item string) {
+    l1 := *l
+    l1.removeElement(item)
+    l1 = append(l1, item)
+    *l = l1
 }
 
 func useConsumer(msg *sarama.ConsumerMessage) {
@@ -101,7 +109,7 @@ func receiveMsg(param ConsumerParam) error {
 		fmt.Printf("Kafka Partitions not detected")
 		return err
 	}
-	topicList = append(topicList, topic)
+	topicList.addElement(topic)
 	fmt.Printf("Add New Topic %v",topicList)
 
 	var (
@@ -126,6 +134,7 @@ func receiveMsg(param ConsumerParam) error {
 		if err != nil {
 			//topicList.removeElement(topic)
 			fmt.Printf("Kafka error: %s\nLeft topics: %s\n", err,topicList)
+			close(closing)
 			return err
 			//os.Exit(-1)
 		}
