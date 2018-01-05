@@ -15,6 +15,7 @@ var (
 
 var producer sarama.SyncProducer
 var kafka sarama.Consumer
+var topicList []string
 
 func newKafkaConfiguration() *sarama.Config {
     conf := sarama.NewConfig()
@@ -73,12 +74,13 @@ func sendMsg(topic string, event interface{}) error {
 func receiveMsg(topic string) {
 	var msgVal []byte
 	var data interface{}
-	//topics := []string{topic}
 	
 	partitionList,err := kafka.Partitions(topic)
 	if err!=nil {
 		fmt.Printf("Kafka Partitions not detected")
 	}
+	topicList = append(topicList, topic)
+	fmt.Printf("Add New Topic %v",topicList)
 	
 	var (
 		messages = make(chan *sarama.ConsumerMessage, 256)
