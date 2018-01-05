@@ -6,7 +6,7 @@ import (
     //"strconv"
     //"fmt"
 )
-
+/*
 func AddConsumerTopic(c *gin.Context) {
     topic,err := c.Param("topic")
     if err==nil {
@@ -16,7 +16,7 @@ func AddConsumerTopic(c *gin.Context) {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
     }
 }
-
+*/
 func RunProduce(c *gin.Context) {
     var data    interface{}
     topic := c.Param("topic")
