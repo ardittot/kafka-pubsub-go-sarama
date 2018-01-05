@@ -7,6 +7,7 @@ import (
     "os"
     "os/signal"
     //"sync"
+    "gopkg.in/resty.v1"
 )
 
 var (
@@ -45,6 +46,9 @@ func useConsumer(msg *sarama.ConsumerMessage) {
 	msgVal := msg.Value
 	json.Unmarshal(msgVal, &data)
 	fmt.Printf("Message:\n%+v\n", data)
+	resty.R().
+            SetBody(data).
+            Post("http://0.0.0.0:8000/crs")
 }
 
 func newKafkaConfiguration() *sarama.Config {

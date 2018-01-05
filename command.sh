@@ -1,6 +1,7 @@
 # Install all required GO packages
 go get -u github.com/gin-gonic/gin
 go get -u github.com/Shopify/sarama
+go get -u gopkg.in/resty.v1
 
 # Compile & run
 #go run main.go
