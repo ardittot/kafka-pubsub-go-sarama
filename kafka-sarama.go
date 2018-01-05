@@ -32,6 +32,13 @@ func (l *topicType) removeElement(item string) {
     }
 }
 
+func useConsumer(msg *sarama.ConsumerMessage) {
+	var data interface{}
+	msgVal = msg.Value
+	json.Unmarshal(msgVal, &data)
+	fmt.Printf("Message:\n%+v\n", data)
+}
+
 func newKafkaConfiguration() *sarama.Config {
     conf := sarama.NewConfig()
     conf.Producer.RequiredAcks = sarama.WaitForAll
@@ -146,9 +153,10 @@ func receiveMsg(param ConsumerParam) error {
 // 			fmt.Printf("Key:\t%s\n", string(msg.Key))
 // 			fmt.Printf("Value:\t%s\n", string(msg.Value))
 // 			fmt.Println()
-			msgVal = msg.Value
-			json.Unmarshal(msgVal, &data)
-			fmt.Printf("Message:\n%+v\n", data)
+// 			msgVal = msg.Value
+// 			json.Unmarshal(msgVal, &data)
+// 			fmt.Printf("Message:\n%+v\n", data)
+			useConsumer(msg)
 		}
 	}()
 	/*
