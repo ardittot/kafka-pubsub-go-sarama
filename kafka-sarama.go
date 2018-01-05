@@ -124,7 +124,7 @@ func receiveMsg(param ConsumerParam) error {
 		fmt.Printf("%d\n",partition)
 		consumer, err := kafka.ConsumePartition(topic, partition, sarama.OffsetOldest)
 		if err != nil {
-			topicList.removeElement(topic)
+			//topicList.removeElement(topic)
 			fmt.Printf("Kafka error: %s\nLeft topics: %s\n", err,topicList)
 			return err
 			//os.Exit(-1)
@@ -153,7 +153,7 @@ func receiveMsg(param ConsumerParam) error {
  			fmt.Printf("Value:\t%s\n", string(msg.Value))
  			fmt.Println()
 			*/
-			useConsumer(msg)
+			go useConsumer(msg)
 		}
 	}()
 	/*
